@@ -1,0 +1,201 @@
+{% load crispy_forms_tags %}
+{% load static %}
+<!doctype html>
+
+<style>
+
+    #id_square_min {
+        width: 200%;
+        margin-left: -15px;
+
+    }
+
+    #id_square_max {
+        width: 200%;
+        margin-top: -54px;
+        margin-left: 80px;
+
+
+    }
+
+
+</style>
+
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'flats/main.css' %}">
+    <title>Dream Analytics</title>
+    <script src="https://maps.api.2gis.ru/2.0/loader.js"></script>
+
+</head>
+<body>
+
+<main>
+    <div id="map" style="width: 100%; height: 450px;"></div>
+
+    <div class="container">
+        <h2 class="my-5 h2 text-center">Сортировка квартир</h2>
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                {% csrf_token %}
+                <form method="POST" class="card-body">
+                    {% csrf_token %}
+
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.coors|as_crispy_field }}
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.building_type|as_crispy_field }}
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.rooms|as_crispy_field }}
+
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.floor|as_crispy_field }}
+
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4"> Диапазон площади:
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            {{ form.square_min|as_crispy_field }}
+                            {{ form.square_max|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.floors_amount|as_crispy_field }}
+
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        {{ form.region|as_crispy_field }}
+
+                    </div>
+                    <div id="district_div">
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            {{ form.district|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div id="msc_div">
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            {{ form.moscow_stations|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div id="spb_div">
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            {{ form.spb_stations|as_crispy_field }}
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg btn-block" type="submit">Продолжить</button>
+                </form>
+
+                {% if avg_price %}
+                <h2>Средняя цена: {{ avg_price }}</h2>
+                {% endif %}
+                {% if flats_amount %}
+                <h2>Найдено квартир: {{ flats_amount }}</h2>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    var locationInfo = document.getElementById('id_coors');
+
+
+    DG.then(function () {
+        var map,
+            marker;
+
+        map = DG.map('map', {
+            center: [42.93189, 47.55642],
+            zoom: 15
+        });
+        marker = DG.marker([42.93189, 47.55642], {
+            draggable: true
+        }).addTo(map);
+
+        map.locate({setView: true, watch: true})
+            .on('locationfound', function (e) {
+                DG.marker([e.latitude, e.longitude], {
+                    draggable: true
+                });
+            })
+            .on('locationerror', function (e) {
+                DG.popup()
+                    .setLatLng(map.getCenter())
+                    .setContent('Доступ к определению местоположения отключён')
+                    .openOn(map);
+            });
+
+        map.on('click', function (e) {
+            marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+        });
+
+        marker.on('move', function (e) {
+            var lat = e.target._latlng.lat.toFixed(5),
+                lng = e.target._latlng.lng.toFixed(5);
+
+            locationInfo.setAttribute("value", lat + ', ' + lng);
+        });
+    });
+
+
+</script>
+</body>
+
+</html>
+<script>
+    var link = document.getElementById('district_div');
+    link.style.display = 'none';
+    var link = document.getElementById('msc_div');
+    link.style.display = 'none';
+    var link = document.getElementById('spb_div');
+    link.style.display = 'none';
+
+    function Hide() {
+        if (document.getElementById('id_region').options[document.getElementById('id_region').selectedIndex].value == "moskva") {
+            document.getElementById('district_div').style.display = 'none';
+            document.getElementById('spb_div').style.display = 'none';
+            document.getElementById('msc_div').style.display = '';
+        } else if (document.getElementById('id_region').options[document.getElementById('id_region').selectedIndex].value == "NotSpecified") {
+            document.getElementById('district_div').style.display = 'none';
+            document.getElementById('msc_div').style.display = 'none';
+            document.getElementById('spb_div').style.display = 'none';
+        } else if (document.getElementById('id_region').options[document.getElementById('id_region').selectedIndex].value == "sankt-peterburg") {
+            document.getElementById('district_div').style.display = 'none';
+            document.getElementById('msc_div').style.display = 'none';
+            document.getElementById('spb_div').style.display = '';
+
+        } else if (document.getElementById('id_region').options[document.getElementById('id_region').selectedIndex].value == "mahachkala") {
+            document.getElementById('district_div').style.display = '';
+            document.getElementById('msc_div').style.display = 'none';
+            document.getElementById('spb_div').style.display = 'none';
+
+        }
+    }
+
+    window.onload = function () {
+        document.getElementById('id_region').onchange = Hide;
+    };
+
+
+</script>
