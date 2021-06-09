@@ -1,6 +1,6 @@
 beautifulsoup4==4.8.0
 bs4==0.0.1
-Django==2.2.9
+Django==2.2.22
 django-crispy-forms==1.7.2
 furl==2.0.0
 lxml==4.4.1
